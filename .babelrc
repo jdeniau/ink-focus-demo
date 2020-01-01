@@ -1,0 +1,4 @@
+{
+  "plugins": ["@babel/plugin-proposal-class-properties"],
+  "presets": ["@ava/stage-4", "@babel/preset-react"]
+}

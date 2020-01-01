@@ -1,0 +1,8 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["xo-react"],
+  "rules": {
+    "react/no-unused-prop-types": 1,
+    "unicorn/no-hex-escape": 0
+  }
+}

@@ -1,0 +1,35 @@
+{
+	"name": "ink-focus-demo",
+	"version": "1.0.0",
+	"main": "index.js",
+	"repository": "git@github.com/jdeniau/ink-focus-demo",
+	"author": "Julien Deniau <julien.deniau@gmail.com>",
+	"license": "MIT",
+	"scripts": {
+		"start": "yarn build && node build/index.js",
+		"build": "mkdir -p build && babel index.js > build/index.js"
+	},
+	"dependencies": {
+		"ink": "^2.6.0",
+		"ink-text-input": "^3.2.1",
+		"react": "16.8.0"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.1.2",
+		"@babel/core": "^7.1.2",
+		"@babel/plugin-proposal-class-properties": "^7.1.0",
+		"@babel/preset-react": "^7.0.0",
+		"@types/react": "^16.8.8",
+		"ava": "*",
+		"babel-eslint": "^10.0.1",
+		"chalk": "^2.4.2",
+		"eslint-config-xo-react": "^0.17.0",
+		"eslint-plugin-react": "^7.11.1",
+		"ink": "^2.0.0",
+		"ink-testing-library": "^1.0.0",
+		"react": "^16.5.2",
+		"sinon": "^7.2.7",
+		"typescript": "^3.3.3333",
+		"xo": "*"
+	}
+}
