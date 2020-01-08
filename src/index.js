@@ -33,4 +33,4 @@ function SearchQuery() {
 	);
 }
 
-render(<SearchQuery />, { debug: false });
+render(<SearchQuery />, { debug: process.argv[2] === "--debug" });

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { useInput, Box, Color } from "ink";
+import React, { useContext, useEffect, useState } from "react";
+import { StdinContext, Box, Color, useInput } from "ink";
+import readline from "readline";
 import FocusContext from "./FocusContext";
 
-function App({ children }) {
+function useFocusSelector() {
 	const [elementList, setElementList] = useState([]);
 	const [focusedIndex, setFocusedIndex] = useState(0);
 
@@ -15,7 +16,7 @@ function App({ children }) {
 		return focusedIndex === elementList.findIndex(e => e === ref);
 	}
 
-	function focusPrevious(input) {
+	function focusPrevious() {
 		let newIndex = focusedIndex - 1;
 		if (newIndex < 0) {
 			newIndex = elementList.length - 1;
@@ -24,7 +25,7 @@ function App({ children }) {
 		setFocusedIndex(newIndex);
 	}
 
-	function focusNext(input) {
+	function focusNext() {
 		let newIndex = focusedIndex + 1;
 		if (newIndex >= elementList.length) {
 			newIndex = 0;
@@ -33,22 +34,60 @@ function App({ children }) {
 		setFocusedIndex(newIndex);
 	}
 
-	useInput((input, key) => {
-		if (key.return) {
-			// should be "tab" but we need something to tell the subcomponent to not respond in this case + tab is not mapped by ink
-			if (key.shift) {
-				// "shift" is not working
-				focusPrevious();
-			} else {
-				focusNext();
-			}
+	const { stdin, isRawModeSupported, setRawMode } = useContext(StdinContext);
+
+	useEffect(() => {
+		if (isRawModeSupported) {
+			setRawMode(true);
 		}
-	});
+
+		return () => {
+			if (isRawModeSupported) {
+				setRawMode(false);
+			}
+		};
+	}, [isRawModeSupported, setRawMode]);
+
+	useEffect(() => {
+		const handleData = (ch, key) => {
+			if (key.name === "tab") {
+				if (key.shift) {
+					focusPrevious();
+				} else {
+					focusNext();
+				}
+			}
+		};
+
+		readline.emitKeypressEvents(stdin);
+		stdin.on("keypress", handleData);
+
+		return () => {
+			stdin.off("keypress", handleData);
+		};
+	}, [stdin, focusNext, focusPrevious]);
+
+	// useInput((input, key) => {
+	// 	console.log(input, key);
+	// 	if (key.return) {
+	// 		// should be "tab" but we need something to tell the subcomponent to not respond in this case + tab is not mapped by ink
+	// 		if (key.shift) {
+	// 			// "shift" is not working
+	// 			focusPrevious();
+	// 		} else {
+	// 			focusNext();
+	// 		}
+	// 	}
+	// });
+
+	return { register, hasFocus, elementList, focusedIndex };
+}
+
+function App({ children }) {
+	const { register, hasFocus, elementList, focusedIndex } = useFocusSelector();
 
 	return (
-		<FocusContext.Provider
-			value={{ register, hasFocus /*, focusNext, focusPrevious */ }}
-		>
+		<FocusContext.Provider value={{ register, hasFocus }}>
 			{children}
 
 			<Color gray>
