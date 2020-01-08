@@ -5,8 +5,13 @@ export default function useFocus(ref) {
 	const focusContext = useContext(FocusContext);
 
 	useEffect(() => {
-		// register as focusable element
+		// register as a focusable element
 		focusContext.register(ref);
+
+		// unregister on unmount
+		return () => {
+			focusContext.unregister(ref);
+		};
 	}, []);
 
 	return focusContext.hasFocus(ref);

@@ -12,6 +12,10 @@ function useFocusSelector() {
 		setElementList(elementList.slice(0)); // don't alter elementList reference, but clone the array
 	}
 
+	function unregister(ref) {
+		setElementList(elementList.filter(element => element !== ref));
+	}
+
 	function hasFocus(ref) {
 		return focusedIndex === elementList.findIndex(e => e === ref);
 	}
@@ -80,14 +84,20 @@ function useFocusSelector() {
 	// 	}
 	// });
 
-	return { register, hasFocus, elementList, focusedIndex };
+	return { register, unregister, hasFocus, elementList, focusedIndex };
 }
 
 function App({ children }) {
-	const { register, hasFocus, elementList, focusedIndex } = useFocusSelector();
+	const {
+		register,
+		unregister,
+		hasFocus,
+		elementList,
+		focusedIndex
+	} = useFocusSelector();
 
 	return (
-		<FocusContext.Provider value={{ register, hasFocus }}>
+		<FocusContext.Provider value={{ register, unregister, hasFocus }}>
 			{children}
 
 			<Color gray>
