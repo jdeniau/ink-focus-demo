@@ -1,18 +1,19 @@
-import { useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import FocusContext from "./FocusContext";
 
-export default function useFocus(ref) {
+export default function useFocus() {
 	const focusContext = useContext(FocusContext);
+	const [focusKey, setFocusKey] = useState(null);
 
 	useEffect(() => {
 		// register as a focusable element
-		focusContext.register(ref);
+		setFocusKey(focusContext.register());
 
 		// unregister on unmount
 		return () => {
-			focusContext.unregister(ref);
+			focusContext.unregister(focusKey);
 		};
 	}, []);
 
-	return focusContext.hasFocus(ref);
+	return focusContext.hasFocus(focusKey);
 }

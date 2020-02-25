@@ -3,21 +3,26 @@ import { StdinContext, Box, Color, useInput } from "ink";
 import readline from "readline";
 import FocusContext from "./FocusContext";
 
+let FOCUS_ID = 0;
+
 function useFocusSelector() {
 	const [elementList, setElementList] = useState([]);
 	const [focusedIndex, setFocusedIndex] = useState(0);
 
-	function register(ref) {
-		elementList.push(ref);
+	function register() {
+		FOCUS_ID++;
+		elementList.push(FOCUS_ID);
 		setElementList(elementList.slice(0)); // don't alter elementList reference, but clone the array
+
+		return FOCUS_ID;
 	}
 
-	function unregister(ref) {
-		setElementList(elementList.filter(element => element !== ref));
+	function unregister(focusId) {
+		setElementList(elementList.filter(element => element !== focusId));
 	}
 
-	function hasFocus(ref) {
-		return focusedIndex === elementList.findIndex(e => e === ref);
+	function hasFocus(focusId) {
+		return focusedIndex === elementList.findIndex(e => e === focusId);
 	}
 
 	function focusPrevious() {

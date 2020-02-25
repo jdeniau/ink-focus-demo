@@ -1,7 +1,7 @@
 import React from "react";
 
 const FocusContext = React.createContext({
-	register: () => {},
+	register: () => 1,
 	unregister: () => {},
 	hasFocus: ref => false
 });
