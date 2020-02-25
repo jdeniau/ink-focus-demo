@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { render, Box } from "ink";
 import TextInput from "./TextInput";
+import TextInputHook from "./TextInputHook";
 import App from "./App";
 
 function SearchQuery() {
@@ -21,7 +22,7 @@ function SearchQuery() {
 
 				<Box>
 					<Box marginRight={1}>What is your quest ?</Box>
-					<TextInput value={quest} onChange={setQuest} />
+					<TextInputHook value={quest} onChange={setQuest} />
 				</Box>
 
 				<Box>
