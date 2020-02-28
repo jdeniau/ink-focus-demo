@@ -1,46 +1,92 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useReducer } from "react";
 import { StdinContext, Box, Color, useInput } from "ink";
 import readline from "readline";
 import FocusContext from "./FocusContext";
 
-let FOCUS_ID = 0;
+const initialFocusState = {
+	currentFocusedIndex: 0,
+	elementList: []
+};
+
+var ID = function() {
+	// Math.random should be unique because of its seeding algorithm.
+	// Convert it to base 36 (numbers + letters), and grab the first 9 characters
+	// after the decimal.
+	return (
+		"_" +
+		Math.random()
+			.toString(36)
+			.substr(2, 9)
+	);
+};
+
+function focusReducer(state, action) {
+	switch (action.type) {
+		case "REGISTER": {
+			const elementList = state.elementList;
+			// const nextFocusId = state.nextFocusId + 1;
+			elementList.push(action.id);
+
+			return {
+				...state,
+				// nextFocusId,
+				elementList: elementList.slice(0)
+			};
+		}
+		case "UNREGISTER": {
+			return {
+				...state,
+				elementList: state.elementList.filter(
+					element => element !== action.focusId
+				)
+			};
+		}
+		case "FOCUS_PREVIOUS": {
+			let newIndex = state.currentFocusedIndex - 1;
+			if (newIndex < 0) {
+				newIndex = state.elementList.length - 1;
+			}
+
+			return {
+				...state,
+				currentFocusedIndex: newIndex
+			};
+		}
+		case "FOCUS_NEXT": {
+			let newIndex = state.currentFocusedIndex + 1;
+			if (newIndex >= state.elementList.length) {
+				newIndex = 0;
+			}
+
+			return {
+				...state,
+				currentFocusedIndex: newIndex
+			};
+		}
+		default:
+			throw new Error(
+				`Unable to handle action with type ${action.type} in focusReducer`
+			);
+	}
+}
 
 function useFocusSelector() {
-	const [elementList, setElementList] = useState([]);
-	const [focusedIndex, setFocusedIndex] = useState(0);
+	const [state, dispatch] = useReducer(focusReducer, initialFocusState);
+	const { elementList, currentFocusedIndex } = state;
 
-	function register() {
-		FOCUS_ID++;
-		elementList.push(FOCUS_ID);
-		setElementList(elementList.slice(0)); // don't alter elementList reference, but clone the array
+	const register = () => {
+		const id = ID();
+		dispatch({ type: "REGISTER", id });
 
-		return FOCUS_ID;
-	}
+		return id;
+	};
 
 	function unregister(focusId) {
-		setElementList(elementList.filter(element => element !== focusId));
+		dispatch({ type: "UNREGISTER", focusId });
 	}
 
 	function hasFocus(focusId) {
-		return focusedIndex === elementList.findIndex(e => e === focusId);
-	}
-
-	function focusPrevious() {
-		let newIndex = focusedIndex - 1;
-		if (newIndex < 0) {
-			newIndex = elementList.length - 1;
-		}
-
-		setFocusedIndex(newIndex);
-	}
-
-	function focusNext() {
-		let newIndex = focusedIndex + 1;
-		if (newIndex >= elementList.length) {
-			newIndex = 0;
-		}
-
-		setFocusedIndex(newIndex);
+		return state.elementList[state.currentFocusedIndex] === focusId;
 	}
 
 	const { stdin, isRawModeSupported, setRawMode } = useContext(StdinContext);
@@ -61,9 +107,9 @@ function useFocusSelector() {
 		const handleData = (ch, key) => {
 			if (key.name === "tab") {
 				if (key.shift) {
-					focusPrevious();
+					dispatch({ type: "FOCUS_PREVIOUS" });
 				} else {
-					focusNext();
+					dispatch({ type: "FOCUS_NEXT" });
 				}
 			}
 		};
@@ -74,7 +120,7 @@ function useFocusSelector() {
 		return () => {
 			stdin.off("keypress", handleData);
 		};
-	}, [stdin, focusNext, focusPrevious]);
+	}, [stdin, dispatch]);
 
 	// useInput((input, key) => {
 	// 	console.log(input, key);
@@ -89,7 +135,7 @@ function useFocusSelector() {
 	// 	}
 	// });
 
-	return { register, unregister, hasFocus, elementList, focusedIndex };
+	return { register, unregister, hasFocus, elementList, currentFocusedIndex };
 }
 
 function App({ children }) {
@@ -98,7 +144,7 @@ function App({ children }) {
 		unregister,
 		hasFocus,
 		elementList,
-		focusedIndex
+		currentFocusedIndex
 	} = useFocusSelector();
 
 	return (
@@ -110,7 +156,7 @@ function App({ children }) {
 					<Box>-----------------------------</Box>
 					<Box>Debug:</Box>
 					<Box>Nb focusable elements : {elementList.length}</Box>
-					<Box>Focused index : {focusedIndex}</Box>
+					<Box>Focused index : {currentFocusedIndex}</Box>
 				</Box>
 			</Color>
 		</FocusContext.Provider>
