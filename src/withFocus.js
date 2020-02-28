@@ -3,7 +3,7 @@ import useFocus from "./useFocus";
 
 function withFocus(WrappedComponent) {
 	function WithFocusHOC({ forwardedRef, ...rest }) {
-		const ref = forwardedRef; // use forwarded ref if it exists, else, the default ref
+		const ref = forwardedRef; // use forwarded ref if it exists
 		const hasFocus = useFocus(); // real hook that manage focus
 
 		return <WrappedComponent ref={ref} focus={hasFocus} {...rest} />;
