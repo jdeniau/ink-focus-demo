@@ -8,12 +8,10 @@ export default function useFocus() {
 	useEffect(() => {
 		// register as a focusable element
 		const generatedFocusKey = focusContext.register();
-		console.log(`registered focus key ${generatedFocusKey}`);
 		setFocusKey(generatedFocusKey);
 
 		// unregister on unmount
 		return () => {
-			console.log(`Unregister focusKey ${generatedFocusKey}`);
 			focusContext.unregister(generatedFocusKey);
 		};
 	}, []);

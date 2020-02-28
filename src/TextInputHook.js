@@ -3,8 +3,7 @@ import TextInputWithoutFocus from "ink-text-input";
 import useFocus from "./useFocus";
 
 export default function TextInputHook(props) {
-	const ref = useRef(null); // might be anything, like 1234 for example
 	const hasFocus = useFocus();
 
-	return <TextInputWithoutFocus ref={ref} focus={hasFocus} {...props} />;
+	return <TextInputWithoutFocus focus={hasFocus} {...props} />;
 }

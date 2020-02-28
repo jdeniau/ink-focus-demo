@@ -1,92 +1,50 @@
-import React, { useContext, useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StdinContext, Box, Color, useInput } from "ink";
 import readline from "readline";
 import FocusContext from "./FocusContext";
 
-const initialFocusState = {
-	currentFocusedIndex: 0,
-	elementList: []
-};
+let FOCUS_ID = 0;
+function nextFocusId() {
+	FOCUS_ID++;
 
-var ID = function() {
-	// Math.random should be unique because of its seeding algorithm.
-	// Convert it to base 36 (numbers + letters), and grab the first 9 characters
-	// after the decimal.
-	return (
-		"_" +
-		Math.random()
-			.toString(36)
-			.substr(2, 9)
-	);
-};
-
-function focusReducer(state, action) {
-	switch (action.type) {
-		case "REGISTER": {
-			const elementList = state.elementList;
-			// const nextFocusId = state.nextFocusId + 1;
-			elementList.push(action.id);
-
-			return {
-				...state,
-				// nextFocusId,
-				elementList: elementList.slice(0)
-			};
-		}
-		case "UNREGISTER": {
-			return {
-				...state,
-				elementList: state.elementList.filter(
-					element => element !== action.focusId
-				)
-			};
-		}
-		case "FOCUS_PREVIOUS": {
-			let newIndex = state.currentFocusedIndex - 1;
-			if (newIndex < 0) {
-				newIndex = state.elementList.length - 1;
-			}
-
-			return {
-				...state,
-				currentFocusedIndex: newIndex
-			};
-		}
-		case "FOCUS_NEXT": {
-			let newIndex = state.currentFocusedIndex + 1;
-			if (newIndex >= state.elementList.length) {
-				newIndex = 0;
-			}
-
-			return {
-				...state,
-				currentFocusedIndex: newIndex
-			};
-		}
-		default:
-			throw new Error(
-				`Unable to handle action with type ${action.type} in focusReducer`
-			);
-	}
+	return FOCUS_ID;
 }
 
 function useFocusSelector() {
-	const [state, dispatch] = useReducer(focusReducer, initialFocusState);
-	const { elementList, currentFocusedIndex } = state;
+	const [currentFocusedIndex, setCurrentFocusedIndex] = useState(0);
+	const [elementList, setElementList] = useState([]);
 
 	const register = () => {
-		const id = ID();
-		dispatch({ type: "REGISTER", id });
+		const focusId = nextFocusId();
+		elementList.push(focusId);
+		setElementList(elementList.slice(0));
 
-		return id;
+		return focusId;
 	};
 
 	function unregister(focusId) {
-		dispatch({ type: "UNREGISTER", focusId });
+		setElementList(prev => prev.filter(element => element !== focusId));
 	}
 
 	function hasFocus(focusId) {
-		return state.elementList[state.currentFocusedIndex] === focusId;
+		return elementList[currentFocusedIndex] === focusId;
+	}
+
+	function focusPrevious() {
+		let newIndex = currentFocusedIndex - 1;
+		if (newIndex < 0) {
+			newIndex = elementList.length - 1;
+		}
+		setCurrentFocusedIndex(newIndex);
+	}
+
+	function focusNext() {
+		let newIndex = currentFocusedIndex + 1;
+		if (newIndex >= elementList.length) {
+			newIndex = 0;
+		}
+
+		setCurrentFocusedIndex(newIndex);
 	}
 
 	const { stdin, isRawModeSupported, setRawMode } = useContext(StdinContext);
@@ -107,9 +65,9 @@ function useFocusSelector() {
 		const handleData = (ch, key) => {
 			if (key.name === "tab") {
 				if (key.shift) {
-					dispatch({ type: "FOCUS_PREVIOUS" });
+					focusPrevious();
 				} else {
-					dispatch({ type: "FOCUS_NEXT" });
+					focusNext();
 				}
 			}
 		};
@@ -120,7 +78,7 @@ function useFocusSelector() {
 		return () => {
 			stdin.off("keypress", handleData);
 		};
-	}, [stdin, dispatch]);
+	}, [stdin, focusNext, focusPrevious]);
 
 	// useInput((input, key) => {
 	// 	console.log(input, key);
