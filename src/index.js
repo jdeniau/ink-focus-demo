@@ -29,12 +29,16 @@ function SearchQuery() {
 
 				<Box>
 					<Box marginRight={1}>What is your quest ?</Box>
-					<TextInputHook value={quest} onChange={setQuest} />
+					<TextInputHook value={quest} onChange={setQuest} tabIndex={2} />
 				</Box>
 
 				<Box>
 					<Box marginRight={1}>What is your favorite color ?</Box>
-					<TextInput value={favoriteColor} onChange={setFavoriteColor} />
+					<TextInput
+						value={favoriteColor}
+						onChange={setFavoriteColor}
+						tabIndex={1}
+					/>
 				</Box>
 
 				{Array(Math.max(parseInt(nbInput, 10), 0) || 0)
